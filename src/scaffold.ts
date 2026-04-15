@@ -138,7 +138,10 @@ export async function scaffoldProject(
     console.log("  xcodegen generate");
     console.log(`  open ${answers.projectName}.xcodeproj`);
   } else if (answers.template === "react-capacitor") {
-    const devCmd = answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`;
+    const devCmd =
+      answers.packageManager === "npm"
+        ? "npm run dev"
+        : `${answers.packageManager} dev`;
     console.log(`  ${devCmd}`);
     console.log(`  ${answers.packageManager} cap:sync`);
     console.log(`  ${answers.packageManager} cap:open:ios`);
@@ -247,8 +250,14 @@ async function scaffoldNodeApiTemplate(answers: Answers, targetDir: string) {
     path.join(targetDir, "package.json"),
     renderNodeApiPackageJson(answers.projectName),
   );
-  await writeFileSafe(path.join(targetDir, "tsconfig.json"), renderNodeApiTsconfig());
-  await writeFileSafe(path.join(targetDir, "src", "index.ts"), renderNodeApiEntry());
+  await writeFileSafe(
+    path.join(targetDir, "tsconfig.json"),
+    renderNodeApiTsconfig(),
+  );
+  await writeFileSafe(
+    path.join(targetDir, "src", "index.ts"),
+    renderNodeApiEntry(),
+  );
   await writeFileSafe(path.join(targetDir, ".gitignore"), renderGitIgnore());
 
   if (answers.installDependencies) {
@@ -267,20 +276,32 @@ async function scaffoldMonorepoTemplate(answers: Answers, targetDir: string) {
     path.join(targetDir, "package.json"),
     renderMonorepoRootPackageJson(answers.projectName, answers.packageManager),
   );
-  await writeFileSafe(path.join(targetDir, "pnpm-workspace.yaml"), renderPnpmWorkspaceYaml());
+  await writeFileSafe(
+    path.join(targetDir, "pnpm-workspace.yaml"),
+    renderPnpmWorkspaceYaml(),
+  );
   await writeFileSafe(path.join(targetDir, ".gitignore"), renderGitIgnore());
 
   await writeJson(
     path.join(appsWebDir, "package.json"),
     renderMonorepoWebPackageJson(answers.projectName, answers.tailwind),
   );
-  await writeFileSafe(path.join(appsWebDir, "tsconfig.json"), renderMonorepoWebTsconfig());
+  await writeFileSafe(
+    path.join(appsWebDir, "tsconfig.json"),
+    renderMonorepoWebTsconfig(),
+  );
   await writeFileSafe(
     path.join(appsWebDir, "vite.config.ts"),
     renderMonorepoWebViteConfig(answers.tailwind),
   );
-  await writeFileSafe(path.join(appsWebDir, "index.html"), renderMonorepoWebIndexHtml());
-  await writeFileSafe(path.join(appsWebDir, "src", "main.tsx"), renderMonorepoWebMain());
+  await writeFileSafe(
+    path.join(appsWebDir, "index.html"),
+    renderMonorepoWebIndexHtml(),
+  );
+  await writeFileSafe(
+    path.join(appsWebDir, "src", "main.tsx"),
+    renderMonorepoWebMain(),
+  );
   await writeFileSafe(
     path.join(appsWebDir, "src", "App.tsx"),
     renderMonorepoWebApp(answers.projectName),
@@ -294,8 +315,14 @@ async function scaffoldMonorepoTemplate(answers: Answers, targetDir: string) {
     path.join(packagesUiDir, "package.json"),
     renderMonorepoUiPackageJson(answers.projectName),
   );
-  await writeFileSafe(path.join(packagesUiDir, "tsconfig.json"), renderMonorepoUiTsconfig());
-  await writeFileSafe(path.join(packagesUiDir, "src", "index.tsx"), renderMonorepoUiEntry());
+  await writeFileSafe(
+    path.join(packagesUiDir, "tsconfig.json"),
+    renderMonorepoUiTsconfig(),
+  );
+  await writeFileSafe(
+    path.join(packagesUiDir, "src", "index.tsx"),
+    renderMonorepoUiEntry(),
+  );
 
   if (answers.installDependencies) {
     await runProjectInstall(answers, targetDir, false);
@@ -304,7 +331,9 @@ async function scaffoldMonorepoTemplate(answers: Answers, targetDir: string) {
 
 async function scaffoldPluginTemplate(answers: Answers, targetDir: string) {
   if (!answers.templateFile) {
-    throw new Error("--template-file is required when using plugin-file template.");
+    throw new Error(
+      "--template-file is required when using plugin-file template.",
+    );
   }
 
   const templateFile = await readPluginTemplateFile(answers.templateFile);
@@ -316,7 +345,10 @@ async function scaffoldPluginTemplate(answers: Answers, targetDir: string) {
   }
 
   if (templateFile.packageJson) {
-    await writeJson(path.join(targetDir, "package.json"), templateFile.packageJson);
+    await writeJson(
+      path.join(targetDir, "package.json"),
+      templateFile.packageJson,
+    );
   }
 
   if (answers.installDependencies && templateFile.packageJson) {
@@ -327,13 +359,22 @@ async function scaffoldPluginTemplate(answers: Answers, targetDir: string) {
 async function customizeProject(answers: Answers, targetDir: string) {
   logger.step("Applying project polish");
 
-  if (answers.template !== "plugin-file" && answers.template !== "ios-swiftui") {
+  if (
+    answers.template !== "plugin-file" &&
+    answers.template !== "ios-swiftui"
+  ) {
     await writeFileSafe(path.join(targetDir, ".gitignore"), renderGitIgnore());
-    await writeFileSafe(path.join(targetDir, "README.md"), renderReadme(answers));
+    await writeFileSafe(
+      path.join(targetDir, "README.md"),
+      renderReadme(answers),
+    );
   }
 
   if (answers.template === "ios-swiftui") {
-    await writeFileSafe(path.join(targetDir, "README.md"), renderReadme(answers));
+    await writeFileSafe(
+      path.join(targetDir, "README.md"),
+      renderReadme(answers),
+    );
   }
 
   if (answers.template === "next-app") {
@@ -461,7 +502,8 @@ async function customizeViteProject(answers: Answers, targetDir: string) {
 }
 
 async function installViteTailwind(answers: Answers, targetDir: string) {
-  const devInstall = PACKAGE_MANAGER_DEV_INSTALL_COMMAND[answers.packageManager];
+  const devInstall =
+    PACKAGE_MANAGER_DEV_INSTALL_COMMAND[answers.packageManager];
 
   await runCommand(
     devInstall[0],
@@ -552,7 +594,10 @@ async function writeViteAppFiles(targetDir: string, answers: Answers) {
 
   await ensureDir(srcDir);
 
-  await writeFileSafe(path.join(srcDir, "index.css"), renderIndexCss(answers.tailwind));
+  await writeFileSafe(
+    path.join(srcDir, "index.css"),
+    renderIndexCss(answers.tailwind),
+  );
 
   if (answers.template === "vite-router-query") {
     await writeFileSafe(
@@ -570,7 +615,10 @@ async function writeViteAppFiles(targetDir: string, answers: Answers) {
 
 async function updateViteEntryFile(targetDir: string, answers: Answers) {
   const srcDir = path.join(targetDir, "src");
-  const mainPath = path.join(srcDir, `main.${answers.typescript ? "tsx" : "jsx"}`);
+  const mainPath = path.join(
+    srcDir,
+    `main.${answers.typescript ? "tsx" : "jsx"}`,
+  );
 
   if (!(await fileExists(mainPath))) {
     return;
@@ -579,7 +627,9 @@ async function updateViteEntryFile(targetDir: string, answers: Answers) {
   if (answers.template === "vite-router-query") {
     await writeFileSafe(
       mainPath,
-      answers.typescript ? renderRouterQueryMainTsx() : renderRouterQueryMainJsx(),
+      answers.typescript
+        ? renderRouterQueryMainTsx()
+        : renderRouterQueryMainJsx(),
     );
     return;
   }
@@ -632,7 +682,11 @@ async function updateJsConfig(targetDir: string, answers: Answers) {
     },
   };
 
-  await fs.writeFile(jsconfigPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+  await fs.writeFile(
+    jsconfigPath,
+    `${JSON.stringify(config, null, 2)}\n`,
+    "utf8",
+  );
 }
 
 async function mergeCompilerOptionsIntoJson(
@@ -645,9 +699,11 @@ async function mergeCompilerOptionsIntoJson(
   const existingCompilerOptions =
     (parsed.compilerOptions as Record<string, unknown> | undefined) ?? {};
   const incomingPaths =
-    (incomingCompilerOptions.paths as Record<string, string[]> | undefined) ?? {};
+    (incomingCompilerOptions.paths as Record<string, string[]> | undefined) ??
+    {};
   const existingPaths =
-    (existingCompilerOptions.paths as Record<string, string[]> | undefined) ?? {};
+    (existingCompilerOptions.paths as Record<string, string[]> | undefined) ??
+    {};
 
   parsed.compilerOptions = {
     ...existingCompilerOptions,
@@ -678,8 +734,14 @@ async function addViteAliasNote(targetDir: string, packageName: string) {
 
 function parseJsonLike(input: string) {
   const withoutBlockComments = input.replace(/\/\*[\s\S]*?\*\//g, "");
-  const withoutLineComments = withoutBlockComments.replace(/(^|\s)\/\/.*$/gm, "");
-  const withoutTrailingCommas = withoutLineComments.replace(/,\s*([}\]])/g, "$1");
+  const withoutLineComments = withoutBlockComments.replace(
+    /(^|\s)\/\/.*$/gm,
+    "",
+  );
+  const withoutTrailingCommas = withoutLineComments.replace(
+    /,\s*([}\]])/g,
+    "$1",
+  );
   return JSON.parse(withoutTrailingCommas) as Record<string, unknown>;
 }
 
@@ -716,7 +778,9 @@ async function runHealthChecks(
   targetDir: string,
 ): Promise<HealthCheckResult[]> {
   if (!answers.installDependencies) {
-    logger.warn("Skipping health checks because dependencies were not installed.");
+    logger.warn(
+      "Skipping health checks because dependencies were not installed.",
+    );
     return [
       {
         name: "health-checks",
@@ -765,7 +829,9 @@ async function runHealthChecks(
     if (result.passed) {
       logger.success(`Health check passed: ${result.name}`);
     } else {
-      logger.error(`Health check failed: ${result.name}${result.message ? ` (${result.message})` : ""}`);
+      logger.error(
+        `Health check failed: ${result.name}${result.message ? ` (${result.message})` : ""}`,
+      );
     }
   }
 
@@ -777,7 +843,10 @@ async function runScript(
   script: string,
   cwd: string,
 ) {
-  const [command, ...args] = packageManagerRunScriptCommand(packageManager, script);
+  const [command, ...args] = packageManagerRunScriptCommand(
+    packageManager,
+    script,
+  );
   await execa(command, args, {
     cwd,
     stdio: "inherit",
@@ -802,7 +871,10 @@ async function scaffoldIosSwiftUiTemplate(answers: Answers, targetDir: string) {
   await ensureDir(appDir);
   await ensureDir(viewsDir);
 
-  await writeFileSafe(path.join(targetDir, "project.yml"), renderProjectYml(answers.projectName));
+  await writeFileSafe(
+    path.join(targetDir, "project.yml"),
+    renderProjectYml(answers.projectName),
+  );
   await writeFileSafe(
     path.join(targetDir, answers.projectName, "Info.plist"),
     renderInfoPlist(answers.projectName),
@@ -861,7 +933,10 @@ const config: CapacitorConfig = {
 
 export default config;
 `;
-  await writeFileSafe(path.join(targetDir, "capacitor.config.ts"), capacitorConfig);
+  await writeFileSafe(
+    path.join(targetDir, "capacitor.config.ts"),
+    capacitorConfig,
+  );
 
   if (answers.installDependencies) {
     const install = PACKAGE_MANAGER_INSTALL_COMMAND[answers.packageManager];
@@ -873,9 +948,14 @@ export default config;
         "@capacitor/ios",
         "@capacitor/android",
       ],
-      { cwd: targetDir, dryRun: false, label: "Install Capacitor dependencies" },
+      {
+        cwd: targetDir,
+        dryRun: false,
+        label: "Install Capacitor dependencies",
+      },
     );
-    const devInstall = PACKAGE_MANAGER_DEV_INSTALL_COMMAND[answers.packageManager];
+    const devInstall =
+      PACKAGE_MANAGER_DEV_INSTALL_COMMAND[answers.packageManager];
     await runCommand(
       devInstall[0],
       [...devInstall.slice(1), "@capacitor/cli"],

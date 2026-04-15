@@ -7,7 +7,9 @@ import { execa } from "execa";
 async function main() {
   await execa("pnpm", ["-s", "build"], { stdio: "inherit" });
 
-  const tempRoot = await fs.mkdtemp(path.join(os.tmpdir(), "create-dushin-stack-"));
+  const tempRoot = await fs.mkdtemp(
+    path.join(os.tmpdir(), "create-dushin-stack-"),
+  );
 
   try {
     await testViteReact(tempRoot);
@@ -23,10 +25,7 @@ async function main() {
   }
 }
 
-async function runCli(
-  cwd: string,
-  args: string[],
-) {
+async function runCli(cwd: string, args: string[]) {
   await execa("node", [path.resolve("dist/index.js"), ...args], {
     cwd,
     stdio: "inherit",
@@ -80,13 +79,18 @@ async function testViteRouterQuery(tempRoot: string) {
   ]);
 
   const projectDir = path.join(tempRoot, projectName);
-  const packageJson = JSON.parse(await read(path.join(projectDir, "package.json"))) as {
+  const packageJson = JSON.parse(
+    await read(path.join(projectDir, "package.json")),
+  ) as {
     dependencies?: Record<string, string>;
   };
   const main = await read(path.join(projectDir, "src", "main.tsx"));
 
   assert.equal(Boolean(packageJson.dependencies?.["react-router-dom"]), true);
-  assert.equal(Boolean(packageJson.dependencies?.["@tanstack/react-query"]), true);
+  assert.equal(
+    Boolean(packageJson.dependencies?.["@tanstack/react-query"]),
+    true,
+  );
   assert.match(main, /QueryClientProvider/);
 }
 
@@ -106,7 +110,9 @@ async function testNodeApi(tempRoot: string) {
 
   const projectDir = path.join(tempRoot, projectName);
   const entry = await read(path.join(projectDir, "src", "index.ts"));
-  const packageJson = JSON.parse(await read(path.join(projectDir, "package.json"))) as {
+  const packageJson = JSON.parse(
+    await read(path.join(projectDir, "package.json")),
+  ) as {
     dependencies?: Record<string, string>;
   };
 
@@ -130,7 +136,9 @@ async function testMonorepo(tempRoot: string) {
   ]);
 
   const projectDir = path.join(tempRoot, projectName);
-  const rootPackageJson = JSON.parse(await read(path.join(projectDir, "package.json"))) as {
+  const rootPackageJson = JSON.parse(
+    await read(path.join(projectDir, "package.json")),
+  ) as {
     workspaces?: string[];
   };
 
@@ -140,7 +148,9 @@ async function testMonorepo(tempRoot: string) {
     true,
   );
   assert.equal(
-    await fileExists(path.join(projectDir, "packages", "ui", "src", "index.tsx")),
+    await fileExists(
+      path.join(projectDir, "packages", "ui", "src", "index.tsx"),
+    ),
     true,
   );
 }
@@ -184,7 +194,10 @@ async function testPluginTemplate(tempRoot: string) {
 
   const projectDir = path.join(tempRoot, projectName);
   assert.equal(await fileExists(path.join(projectDir, "README.md")), true);
-  assert.equal(await fileExists(path.join(projectDir, "src", "index.ts")), true);
+  assert.equal(
+    await fileExists(path.join(projectDir, "src", "index.ts")),
+    true,
+  );
 }
 
 async function testIosSwiftui(tempRoot: string) {
@@ -231,8 +244,12 @@ async function testReactCapacitor(tempRoot: string) {
   ]);
 
   const projectDir = path.join(tempRoot, projectName);
-  const capacitorConfig = await read(path.join(projectDir, "capacitor.config.ts"));
-  const packageJson = JSON.parse(await read(path.join(projectDir, "package.json"))) as {
+  const capacitorConfig = await read(
+    path.join(projectDir, "capacitor.config.ts"),
+  );
+  const packageJson = JSON.parse(
+    await read(path.join(projectDir, "package.json")),
+  ) as {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;
     scripts?: Record<string, string>;

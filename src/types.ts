@@ -1,4 +1,11 @@
-export type Framework = "next" | "vite" | "node" | "monorepo" | "plugin" | "ios" | "mobile";
+export type Framework =
+  | "next"
+  | "vite"
+  | "node"
+  | "monorepo"
+  | "plugin"
+  | "ios"
+  | "mobile";
 export type TemplateId =
   | "next-app"
   | "vite-react"

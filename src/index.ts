@@ -12,7 +12,14 @@ import type {
 } from "./types.js";
 
 const program = new Command();
-const frameworks = ["next", "vite", "node", "monorepo", "ios", "mobile"] as const;
+const frameworks = [
+  "next",
+  "vite",
+  "node",
+  "monorepo",
+  "ios",
+  "mobile",
+] as const;
 const packageManagers = ["pnpm", "npm", "yarn", "bun"] as const;
 
 program
@@ -36,10 +43,7 @@ program
     `starter, saas, content-site, or dashboard`,
     parseChoice("preset", presetIds),
   )
-  .option(
-    "--template-file <path>",
-    "Path to a local plugin template JSON file",
-  )
+  .option("--template-file <path>", "Path to a local plugin template JSON file")
   .option(
     "-p, --package-manager <packageManager>",
     "pnpm, npm, yarn, or bun",
