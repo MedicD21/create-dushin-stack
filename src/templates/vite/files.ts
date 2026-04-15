@@ -1,5 +1,5 @@
 function resolveAliasKey(importAlias: string) {
-  return importAlias.replace(/\/\*$/, '');
+  return importAlias.replace(/\/\*$/, "");
 }
 
 export function renderViteConfigTs(withTailwind: boolean, importAlias: string) {
@@ -9,14 +9,18 @@ export function renderViteConfigTs(withTailwind: boolean, importAlias: string) {
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-${withTailwind ? `import tailwindcss from '@tailwindcss/vite';
-` : ''}
+${
+  withTailwind
+    ? `import tailwindcss from '@tailwindcss/vite';
+`
+    : ""
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()${withTailwind ? ', tailwindcss()' : ''}],
+  plugins: [react()${withTailwind ? ", tailwindcss()" : ""}],
   resolve: {
     alias: {
       '${aliasKey}': path.resolve(__dirname, 'src'),
@@ -33,14 +37,18 @@ export function renderViteConfigJs(withTailwind: boolean, importAlias: string) {
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-${withTailwind ? `import tailwindcss from '@tailwindcss/vite';
-` : ''}
+${
+  withTailwind
+    ? `import tailwindcss from '@tailwindcss/vite';
+`
+    : ""
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default defineConfig({
-  plugins: [react()${withTailwind ? ', tailwindcss()' : ''}],
+  plugins: [react()${withTailwind ? ", tailwindcss()" : ""}],
   resolve: {
     alias: {
       '${aliasKey}': path.resolve(__dirname, 'src'),
@@ -94,8 +102,8 @@ export function renderAppTsx(withTailwind: boolean) {
     <main className=${withTailwind ? '"min-h-screen p-8"' : '"app"'}>
       <div className=${withTailwind ? '"mx-auto max-w-3xl space-y-4"' : '""'}>
         <p>Your app is ready.</p>
-        <h1${withTailwind ? ' className="text-4xl font-semibold tracking-tight"' : ''}>create-morgan-stack</h1>
-        <p${withTailwind ? ' className="text-slate-600"' : ''}>
+        <h1${withTailwind ? ' className="text-4xl font-semibold tracking-tight"' : ""}>create-dushin-stack</h1>
+        <p${withTailwind ? ' className="text-slate-600"' : ""}>
           Start building in <code>src/App.tsx</code>.
         </p>
       </div>
@@ -111,8 +119,8 @@ export function renderAppJsx(withTailwind: boolean) {
     <main className=${withTailwind ? '"min-h-screen p-8"' : '"app"'}>
       <div className=${withTailwind ? '"mx-auto max-w-3xl space-y-4"' : '""'}>
         <p>Your app is ready.</p>
-        <h1${withTailwind ? ' className="text-4xl font-semibold tracking-tight"' : ''}>create-morgan-stack</h1>
-        <p${withTailwind ? ' className="text-slate-600"' : ''}>
+        <h1${withTailwind ? ' className="text-4xl font-semibold tracking-tight"' : ""}>create-dushin-stack</h1>
+        <p${withTailwind ? ' className="text-slate-600"' : ""}>
           Start building in <code>src/App.jsx</code>.
         </p>
       </div>
@@ -125,9 +133,9 @@ export function renderAppJsx(withTailwind: boolean) {
 export function renderTsConfigPaths(importAlias: string) {
   return {
     compilerOptions: {
-      baseUrl: '.',
+      baseUrl: ".",
       paths: {
-        [importAlias]: ['src/*'],
+        [importAlias]: ["src/*"],
       },
     },
   };

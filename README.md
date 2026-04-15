@@ -1,4 +1,4 @@
-# create-morgan-stack
+# create-dushin-stack
 
 An interactive `create-*` CLI for bootstrapping polished React projects with your preferred stack defaults.
 
@@ -26,32 +26,33 @@ pnpm link --global
 Then run:
 
 ```bash
-create-morgan-stack
+create-dushin-stack
 ```
 
 Or with npm's initializer pattern:
 
 ```bash
-npm init morgan-stack@latest my-app
+npm init dushin-stack@latest my-app
 ```
 
 ## Example commands
 
 ```bash
-create-morgan-stack
-create-morgan-stack my-app --framework next --package-manager pnpm
-create-morgan-stack my-app --framework vite --no-tailwind --dry-run
+create-dushin-stack
+create-dushin-stack my-app --framework next --package-manager pnpm
+create-dushin-stack my-app --framework vite --no-tailwind --dry-run
+create-dushin-stack my-app --framework vite --package-manager pnpm --no-shared-ui --yes
 ```
 
 ## Publish later
 
-When you are ready to publish, remove `private` if you add it, publish to npm as `create-morgan-stack`, and users can run:
+When you are ready to publish, remove `private` if you add it, publish to npm as `create-dushin-stack`, and users can run:
 
 ```bash
-npm init morgan-stack@latest my-app
-pnpm create morgan-stack my-app
+npm init dushin-stack@latest my-app
+pnpm create dushin-stack my-app
 ```
 
-## Why this shape?
+## Non-interactive usage
 
-npm's `create-*` initializer pattern maps `npm init foo` to `npx create-foo`, and npm/Node support executable package bins via the `bin` field in `package.json`. Next.js recommends `create-next-app` for new projects, and Tailwind's current Vite guide recommends the `@tailwindcss/vite` plugin for Vite projects. citeturn796738view2turn252303search8turn796738view1turn796738view0
+When you want to run this in scripts or CI, pass the options explicitly and add `--yes` to accept defaults for any remaining prompts.
