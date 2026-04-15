@@ -15,6 +15,8 @@ async function main() {
     await testNodeApi(tempRoot);
     await testMonorepo(tempRoot);
     await testPluginTemplate(tempRoot);
+    await testIosSwiftui(tempRoot);
+    await testReactCapacitor(tempRoot);
     console.log("Integration checks passed.");
   } finally {
     await fs.rm(tempRoot, { recursive: true, force: true });
@@ -183,6 +185,65 @@ async function testPluginTemplate(tempRoot: string) {
   const projectDir = path.join(tempRoot, projectName);
   assert.equal(await fileExists(path.join(projectDir, "README.md")), true);
   assert.equal(await fileExists(path.join(projectDir, "src", "index.ts")), true);
+}
+
+async function testIosSwiftui(tempRoot: string) {
+  const projectName = "ios-swiftui-case";
+  await runCli(tempRoot, [
+    projectName,
+    "--template",
+    "ios-swiftui",
+    "--package-manager",
+    "pnpm",
+    "--no-install",
+    "--no-git",
+    "--no-health-checks",
+    "--yes",
+  ]);
+
+  const projectDir = path.join(tempRoot, projectName);
+  const projectYml = await read(path.join(projectDir, "project.yml"));
+  const appSwift = await read(
+    path.join(projectDir, projectName, "App", `${projectName}App.swift`),
+  );
+  const contentView = await read(
+    path.join(projectDir, projectName, "Views", "ContentView.swift"),
+  );
+
+  assert.match(projectYml, /name:/);
+  assert.match(appSwift, /@main/);
+  assert.match(contentView, /ContentView/);
+}
+
+async function testReactCapacitor(tempRoot: string) {
+  const projectName = "react-capacitor-case";
+  await runCli(tempRoot, [
+    projectName,
+    "--template",
+    "react-capacitor",
+    "--package-manager",
+    "pnpm",
+    "--typescript",
+    "--no-install",
+    "--no-git",
+    "--no-health-checks",
+    "--yes",
+  ]);
+
+  const projectDir = path.join(tempRoot, projectName);
+  const capacitorConfig = await read(path.join(projectDir, "capacitor.config.ts"));
+  const packageJson = JSON.parse(await read(path.join(projectDir, "package.json"))) as {
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+    scripts?: Record<string, string>;
+  };
+
+  assert.match(capacitorConfig, /@capacitor\/cli/);
+  assert.equal(Boolean(packageJson.dependencies?.["@capacitor/core"]), true);
+  assert.equal(Boolean(packageJson.dependencies?.["@capacitor/ios"]), true);
+  assert.equal(Boolean(packageJson.dependencies?.["@capacitor/android"]), true);
+  assert.equal(Boolean(packageJson.devDependencies?.["@capacitor/cli"]), true);
+  assert.equal(Boolean(packageJson.scripts?.["cap:sync"]), true);
 }
 
 async function fileExists(filePath: string) {

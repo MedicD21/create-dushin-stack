@@ -148,6 +148,18 @@ var TEMPLATE_DEFINITIONS = [
     label: "Monorepo (web + ui)",
     description: "Workspace starter with apps/web and packages/ui.",
     framework: "monorepo"
+  },
+  {
+    id: "ios-swiftui",
+    label: "iOS (SwiftUI)",
+    description: "Native iOS app with SwiftUI, XcodeGen project.yml.",
+    framework: "ios"
+  },
+  {
+    id: "react-capacitor",
+    label: "React + Capacitor (iOS/Android)",
+    description: "React + Vite app with Capacitor for iOS and Android.",
+    framework: "mobile"
   }
 ];
 var TEMPLATE_IDS = TEMPLATE_DEFINITIONS.map((t) => t.id);
@@ -169,10 +181,16 @@ function templateFromFramework(framework) {
       return "monorepo-web-ui";
     case "plugin":
       return "plugin-file";
+    case "ios":
+      return "ios-swiftui";
+    case "mobile":
+      return "react-capacitor";
   }
 }
 function frameworkFromTemplate(template) {
   if (template === "plugin-file") return "plugin";
+  if (template === "ios-swiftui") return "ios";
+  if (template === "react-capacitor") return "mobile";
   const found = TEMPLATE_DEFINITIONS.find((entry) => entry.id === template);
   return found?.framework ?? "vite";
 }
@@ -404,6 +422,99 @@ function renderAgentsMd() {
 - Keep shared UI in a dedicated package.
 - Use the import alias consistently.
 - Avoid large page files by extracting sections into components.
+`;
+}
+
+// src/templates/ios/swiftui.ts
+function renderProjectYml(projectName) {
+  return `name: ${projectName}
+options:
+  bundleIdPrefix: com.example
+  deploymentTarget:
+    iOS: "17.0"
+targets:
+  ${projectName}:
+    type: application
+    platform: iOS
+    sources:
+      - ${projectName}
+    info:
+      path: ${projectName}/Info.plist
+      properties:
+        CFBundleDisplayName: ${projectName}
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0.0"
+        UILaunchScreen: {}
+`;
+}
+function renderInfoPlist(projectName) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleExecutable</key>
+  <string>$(EXECUTABLE_NAME)</string>
+  <key>CFBundleIdentifier</key>
+  <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>${projectName}</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>1.0.0</string>
+  <key>CFBundleVersion</key>
+  <string>1</string>
+  <key>LSRequiresIPhoneOS</key>
+  <true/>
+  <key>UILaunchScreen</key>
+  <dict/>
+  <key>UISupportedInterfaceOrientations</key>
+  <array>
+    <string>UIInterfaceOrientationPortrait</string>
+    <string>UIInterfaceOrientationLandscapeLeft</string>
+    <string>UIInterfaceOrientationLandscapeRight</string>
+  </array>
+</dict>
+</plist>
+`;
+}
+function renderAppSwift(projectName) {
+  return `import SwiftUI
+
+@main
+struct ${projectName}App: App {
+  var body: some Scene {
+    WindowGroup {
+      ContentView()
+    }
+  }
+}
+`;
+}
+function renderContentView(projectName) {
+  return `import SwiftUI
+
+struct ContentView: View {
+  var body: some View {
+    VStack(spacing: 16) {
+      Text("${projectName}")
+        .font(.largeTitle)
+        .fontWeight(.bold)
+      Text("Scaffolded with create-dushin-stack")
+        .font(.subheadline)
+        .foregroundStyle(.secondary)
+    }
+    .padding()
+  }
+}
+
+#Preview {
+  ContentView()
+}
 `;
 }
 
@@ -715,9 +826,61 @@ var TEMPLATE_LABELS = {
   "vite-router-query": "Vite + Router + Query",
   "node-api-hono": "Node API (Hono)",
   "monorepo-web-ui": "Monorepo (web + ui)",
-  "plugin-file": "Plugin template"
+  "plugin-file": "Plugin template",
+  "ios-swiftui": "iOS (SwiftUI)",
+  "react-capacitor": "React + Capacitor (iOS/Android)"
 };
 function renderReadme(answers) {
+  if (answers.template === "ios-swiftui") {
+    return `# ${answers.projectName}
+
+Scaffolded with create-dushin-stack.
+
+## Template
+
+- iOS (SwiftUI)
+
+## Requirements
+
+- Xcode 15+
+- [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+
+## Getting Started
+
+\`\`\`bash
+brew install xcodegen
+xcodegen generate
+open ${answers.projectName}.xcodeproj
+\`\`\`
+`;
+  }
+  if (answers.template === "react-capacitor") {
+    const runCommand3 = answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`;
+    return `# ${answers.projectName}
+
+Scaffolded with create-dushin-stack.
+
+## Template
+
+- React + Capacitor (iOS/Android)
+
+## Development
+
+    ${runCommand3}
+
+## Mobile
+
+Sync web assets and open native projects:
+
+    ${answers.packageManager} cap:sync
+    ${answers.packageManager} cap:open:ios
+    ${answers.packageManager} cap:open:android
+
+## Notes
+
+- Import alias: ${answers.importAlias}
+`;
+  }
   const runCommand2 = answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`;
   return `# ${answers.projectName}
 
@@ -760,6 +923,9 @@ function getStarterFiles(answers) {
   const componentsDir = base ? `${base}/components` : "components";
   const hooksDir = base ? `${base}/hooks` : "hooks";
   const buttonImport = answers.framework === "next" ? `import { cn } from '${answers.useSrcDir ? "@/lib/cn" : "@/lib/cn"}';` : `import { cn } from '${libDir === "src/lib" ? "../lib/cn" : "../lib/cn"}';`;
+  const uiDir = base ? `${base}/ui` : "ui";
+  const servicesDir = base ? `${base}/services` : "services";
+  const utilsDir = base ? `${base}/utils` : "utils";
   return [
     {
       path: `${libDir}/cn.${answers.typescript ? "ts" : "js"}`,
@@ -796,6 +962,27 @@ Place reusable hooks here.
       content: `# Components
 
 Place app-specific components here. Reusable cross-project components belong in your shared UI package.
+`
+    },
+    {
+      path: `${uiDir}/README.md`,
+      content: `# UI
+
+Place shared UI primitives and design system components here.
+`
+    },
+    {
+      path: `${servicesDir}/README.md`,
+      content: `# Services
+
+Place API clients, data-fetching logic, and external service integrations here.
+`
+    },
+    {
+      path: `${utilsDir}/README.md`,
+      content: `# Utils
+
+Place general-purpose utility functions here.
 `
     }
   ];
@@ -969,6 +1156,9 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()${withTailwind ? ", tailwindcss()" : ""}],
+  server: {
+    open: !process.env['NO_OPEN'],
+  },
   resolve: {
     alias: {
       '${aliasKey}': path.resolve(__dirname, 'src'),
@@ -991,6 +1181,9 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()${withTailwind ? ", tailwindcss()" : ""}],
+  server: {
+    open: !process.env['NO_OPEN'],
+  },
   resolve: {
     alias: {
       '${aliasKey}': path.resolve(__dirname, 'src'),
@@ -1103,6 +1296,12 @@ async function scaffoldProject(answers, options) {
     if (!dryRun) {
       await scaffoldPluginTemplate(answers, targetDir);
     }
+  } else if (answers.template === "ios-swiftui") {
+    if (!dryRun) {
+      await scaffoldIosSwiftUiTemplate(answers, targetDir);
+    }
+  } else if (answers.template === "react-capacitor") {
+    await createViteApp(answers, options.cwd, dryRun);
   }
   if (!dryRun) {
     await customizeProject(answers, targetDir);
@@ -1111,9 +1310,20 @@ async function scaffoldProject(answers, options) {
   logger.success(`Finished scaffolding ${answers.projectName}`);
   logger.info("Next steps:");
   console.log(`  cd ${answers.projectName}`);
-  console.log(
-    `  ${answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`}`
-  );
+  if (answers.template === "ios-swiftui") {
+    console.log("  brew install xcodegen");
+    console.log("  xcodegen generate");
+    console.log(`  open ${answers.projectName}.xcodeproj`);
+  } else if (answers.template === "react-capacitor") {
+    const devCmd = answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`;
+    console.log(`  ${devCmd}`);
+    console.log(`  ${answers.packageManager} cap:sync`);
+    console.log(`  ${answers.packageManager} cap:open:ios`);
+  } else {
+    console.log(
+      `  ${answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`}`
+    );
+  }
   return {
     projectName: answers.projectName,
     template: answers.template,
@@ -1170,11 +1380,14 @@ async function createViteApp(answers, cwd, dryRun) {
     answers.projectName,
     ...templateArgs
   ];
-  await runCommand(base[0], args, {
-    cwd,
-    dryRun,
-    label: "Create Vite app"
-  });
+  logger.step("Create Vite app");
+  console.log(`  ${[base[0], ...args].join(" ")}`);
+  if (!dryRun) {
+    await execa(base[0], args, {
+      cwd,
+      stdio: ["pipe", "inherit", "inherit"]
+    });
+  }
   const targetDir = path2.resolve(cwd, answers.projectName);
   if (answers.installDependencies) {
     await runProjectInstall(answers, targetDir, dryRun);
@@ -1257,17 +1470,23 @@ async function scaffoldPluginTemplate(answers, targetDir) {
 }
 async function customizeProject(answers, targetDir) {
   logger.step("Applying project polish");
-  if (answers.template !== "plugin-file") {
+  if (answers.template !== "plugin-file" && answers.template !== "ios-swiftui") {
     await writeFileSafe(path2.join(targetDir, ".gitignore"), renderGitIgnore());
+    await writeFileSafe(path2.join(targetDir, "README.md"), renderReadme(answers));
+  }
+  if (answers.template === "ios-swiftui") {
     await writeFileSafe(path2.join(targetDir, "README.md"), renderReadme(answers));
   }
   if (answers.template === "next-app") {
     await customizeNextProject(answers, targetDir);
   }
-  if (answers.template === "vite-react" || answers.template === "vite-router-query") {
+  if (answers.template === "vite-react" || answers.template === "vite-router-query" || answers.template === "react-capacitor") {
     await customizeViteProject(answers, targetDir);
   }
-  if (answers.addStarterFolders && (answers.template === "next-app" || answers.template === "vite-react" || answers.template === "vite-router-query")) {
+  if (answers.template === "react-capacitor") {
+    await addCapacitorToProject(answers, targetDir);
+  }
+  if (answers.addStarterFolders && (answers.template === "next-app" || answers.template === "vite-react" || answers.template === "vite-router-query" || answers.template === "react-capacitor")) {
     for (const file of getStarterFiles(answers)) {
       await writeFileSafe(path2.join(targetDir, file.path), file.content);
     }
@@ -1601,6 +1820,81 @@ function packageManagerRunScriptCommand(packageManager, script) {
   }
   return [packageManager, script];
 }
+async function scaffoldIosSwiftUiTemplate(answers, targetDir) {
+  const appDir = path2.join(targetDir, answers.projectName, "App");
+  const viewsDir = path2.join(targetDir, answers.projectName, "Views");
+  await ensureDir(appDir);
+  await ensureDir(viewsDir);
+  await writeFileSafe(path2.join(targetDir, "project.yml"), renderProjectYml(answers.projectName));
+  await writeFileSafe(
+    path2.join(targetDir, answers.projectName, "Info.plist"),
+    renderInfoPlist(answers.projectName)
+  );
+  await writeFileSafe(
+    path2.join(appDir, `${answers.projectName}App.swift`),
+    renderAppSwift(answers.projectName)
+  );
+  await writeFileSafe(
+    path2.join(viewsDir, "ContentView.swift"),
+    renderContentView(answers.projectName)
+  );
+}
+async function addCapacitorToProject(answers, targetDir) {
+  const packageJsonPath = path2.join(targetDir, "package.json");
+  if (!await fileExists(packageJsonPath)) return;
+  const parsed = JSON.parse(await fs3.readFile(packageJsonPath, "utf8"));
+  parsed.scripts = {
+    ...parsed.scripts ?? {},
+    "cap:sync": "cap sync",
+    "cap:open:ios": "cap open ios",
+    "cap:open:android": "cap open android"
+  };
+  parsed.dependencies = {
+    ...parsed.dependencies ?? {},
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/android": "^7.0.0"
+  };
+  parsed.devDependencies = {
+    ...parsed.devDependencies ?? {},
+    "@capacitor/cli": "^7.0.0"
+  };
+  await fs3.writeFile(packageJsonPath, `${JSON.stringify(parsed, null, 2)}
+`);
+  const capacitorConfig = `import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.example.${answers.projectName.toLowerCase().replace(/[^a-z0-9]/g, "")}',
+  appName: '${answers.projectName}',
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https',
+  },
+};
+
+export default config;
+`;
+  await writeFileSafe(path2.join(targetDir, "capacitor.config.ts"), capacitorConfig);
+  if (answers.installDependencies) {
+    const install = PACKAGE_MANAGER_INSTALL_COMMAND[answers.packageManager];
+    await runCommand(
+      install[0],
+      [
+        ...install.slice(1),
+        "@capacitor/core",
+        "@capacitor/ios",
+        "@capacitor/android"
+      ],
+      { cwd: targetDir, dryRun: false, label: "Install Capacitor dependencies" }
+    );
+    const devInstall = PACKAGE_MANAGER_DEV_INSTALL_COMMAND[answers.packageManager];
+    await runCommand(
+      devInstall[0],
+      [...devInstall.slice(1), "@capacitor/cli"],
+      { cwd: targetDir, dryRun: false, label: "Install Capacitor CLI" }
+    );
+  }
+}
 async function writeJson(filePath, value) {
   await writeFileSafe(filePath, `${JSON.stringify(value, null, 2)}
 `);
@@ -1617,7 +1911,7 @@ async function runCommand(command, args, opts) {
 
 // src/index.ts
 var program = new Command();
-var frameworks = ["next", "vite", "node", "monorepo"];
+var frameworks = ["next", "vite", "node", "monorepo", "ios", "mobile"];
 var packageManagers = ["pnpm", "npm", "yarn", "bun"];
 program.name("create-dushin-stack").description(
   "Scaffold polished templates for Next.js, Vite, APIs, and monorepos."

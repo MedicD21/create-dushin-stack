@@ -21,6 +21,9 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()${withTailwind ? ", tailwindcss()" : ""}],
+  server: {
+    open: !process.env['NO_OPEN'],
+  },
   resolve: {
     alias: {
       '${aliasKey}': path.resolve(__dirname, 'src'),
@@ -49,6 +52,9 @@ const __dirname = path.dirname(__filename);
 
 export default defineConfig({
   plugins: [react()${withTailwind ? ", tailwindcss()" : ""}],
+  server: {
+    open: !process.env['NO_OPEN'],
+  },
   resolve: {
     alias: {
       '${aliasKey}': path.resolve(__dirname, 'src'),

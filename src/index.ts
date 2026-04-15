@@ -12,7 +12,7 @@ import type {
 } from "./types.js";
 
 const program = new Command();
-const frameworks = ["next", "vite", "node", "monorepo"] as const;
+const frameworks = ["next", "vite", "node", "monorepo", "ios", "mobile"] as const;
 const packageManagers = ["pnpm", "npm", "yarn", "bun"] as const;
 
 program

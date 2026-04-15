@@ -16,6 +16,12 @@ import {
 import { logger } from "./lib/logger.js";
 import { renderAgentsMd } from "./templates/next/agents.js";
 import {
+  renderAppSwift,
+  renderContentView,
+  renderInfoPlist,
+  renderProjectYml,
+} from "./templates/ios/swiftui.js";
+import {
   renderMonorepoRootPackageJson,
   renderMonorepoUiEntry,
   renderMonorepoUiPackageJson,
@@ -106,6 +112,12 @@ export async function scaffoldProject(
     if (!dryRun) {
       await scaffoldPluginTemplate(answers, targetDir);
     }
+  } else if (answers.template === "ios-swiftui") {
+    if (!dryRun) {
+      await scaffoldIosSwiftUiTemplate(answers, targetDir);
+    }
+  } else if (answers.template === "react-capacitor") {
+    await createViteApp(answers, options.cwd, dryRun);
   }
 
   if (!dryRun) {
@@ -120,9 +132,21 @@ export async function scaffoldProject(
   logger.success(`Finished scaffolding ${answers.projectName}`);
   logger.info("Next steps:");
   console.log(`  cd ${answers.projectName}`);
-  console.log(
-    `  ${answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`}`,
-  );
+
+  if (answers.template === "ios-swiftui") {
+    console.log("  brew install xcodegen");
+    console.log("  xcodegen generate");
+    console.log(`  open ${answers.projectName}.xcodeproj`);
+  } else if (answers.template === "react-capacitor") {
+    const devCmd = answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`;
+    console.log(`  ${devCmd}`);
+    console.log(`  ${answers.packageManager} cap:sync`);
+    console.log(`  ${answers.packageManager} cap:open:ios`);
+  } else {
+    console.log(
+      `  ${answers.packageManager === "npm" ? "npm run dev" : `${answers.packageManager} dev`}`,
+    );
+  }
 
   return {
     projectName: answers.projectName,
@@ -187,11 +211,17 @@ async function createViteApp(answers: Answers, cwd: string, dryRun: boolean) {
     ...templateArgs,
   ];
 
-  await runCommand(base[0], args, {
-    cwd,
-    dryRun,
-    label: "Create Vite app",
-  });
+  logger.step("Create Vite app");
+  console.log(`  ${[base[0], ...args].join(" ")}`);
+
+  if (!dryRun) {
+    // Run with piped stdin so create-vite treats this as non-interactive
+    // and skips the "Install now?" prompt (create-vite v6+).
+    await execa(base[0], args, {
+      cwd,
+      stdio: ["pipe", "inherit", "inherit"],
+    });
+  }
 
   const targetDir = path.resolve(cwd, answers.projectName);
 
@@ -297,8 +327,12 @@ async function scaffoldPluginTemplate(answers: Answers, targetDir: string) {
 async function customizeProject(answers: Answers, targetDir: string) {
   logger.step("Applying project polish");
 
-  if (answers.template !== "plugin-file") {
+  if (answers.template !== "plugin-file" && answers.template !== "ios-swiftui") {
     await writeFileSafe(path.join(targetDir, ".gitignore"), renderGitIgnore());
+    await writeFileSafe(path.join(targetDir, "README.md"), renderReadme(answers));
+  }
+
+  if (answers.template === "ios-swiftui") {
     await writeFileSafe(path.join(targetDir, "README.md"), renderReadme(answers));
   }
 
@@ -308,16 +342,22 @@ async function customizeProject(answers: Answers, targetDir: string) {
 
   if (
     answers.template === "vite-react" ||
-    answers.template === "vite-router-query"
+    answers.template === "vite-router-query" ||
+    answers.template === "react-capacitor"
   ) {
     await customizeViteProject(answers, targetDir);
+  }
+
+  if (answers.template === "react-capacitor") {
+    await addCapacitorToProject(answers, targetDir);
   }
 
   if (
     answers.addStarterFolders &&
     (answers.template === "next-app" ||
       answers.template === "vite-react" ||
-      answers.template === "vite-router-query")
+      answers.template === "vite-router-query" ||
+      answers.template === "react-capacitor")
   ) {
     for (const file of getStarterFiles(answers)) {
       await writeFileSafe(path.join(targetDir, file.path), file.content);
@@ -753,6 +793,95 @@ function packageManagerRunScriptCommand(
   }
 
   return [packageManager, script];
+}
+
+async function scaffoldIosSwiftUiTemplate(answers: Answers, targetDir: string) {
+  const appDir = path.join(targetDir, answers.projectName, "App");
+  const viewsDir = path.join(targetDir, answers.projectName, "Views");
+
+  await ensureDir(appDir);
+  await ensureDir(viewsDir);
+
+  await writeFileSafe(path.join(targetDir, "project.yml"), renderProjectYml(answers.projectName));
+  await writeFileSafe(
+    path.join(targetDir, answers.projectName, "Info.plist"),
+    renderInfoPlist(answers.projectName),
+  );
+  await writeFileSafe(
+    path.join(appDir, `${answers.projectName}App.swift`),
+    renderAppSwift(answers.projectName),
+  );
+  await writeFileSafe(
+    path.join(viewsDir, "ContentView.swift"),
+    renderContentView(answers.projectName),
+  );
+}
+
+async function addCapacitorToProject(answers: Answers, targetDir: string) {
+  const packageJsonPath = path.join(targetDir, "package.json");
+  if (!(await fileExists(packageJsonPath))) return;
+
+  const parsed = JSON.parse(await fs.readFile(packageJsonPath, "utf8")) as {
+    scripts?: Record<string, string>;
+    dependencies?: Record<string, string>;
+    devDependencies?: Record<string, string>;
+  };
+
+  parsed.scripts = {
+    ...(parsed.scripts ?? {}),
+    "cap:sync": "cap sync",
+    "cap:open:ios": "cap open ios",
+    "cap:open:android": "cap open android",
+  };
+
+  parsed.dependencies = {
+    ...(parsed.dependencies ?? {}),
+    "@capacitor/core": "^7.0.0",
+    "@capacitor/ios": "^7.0.0",
+    "@capacitor/android": "^7.0.0",
+  };
+
+  parsed.devDependencies = {
+    ...(parsed.devDependencies ?? {}),
+    "@capacitor/cli": "^7.0.0",
+  };
+
+  await fs.writeFile(packageJsonPath, `${JSON.stringify(parsed, null, 2)}\n`);
+
+  const capacitorConfig = `import type { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'com.example.${answers.projectName.toLowerCase().replace(/[^a-z0-9]/g, "")}',
+  appName: '${answers.projectName}',
+  webDir: 'dist',
+  server: {
+    androidScheme: 'https',
+  },
+};
+
+export default config;
+`;
+  await writeFileSafe(path.join(targetDir, "capacitor.config.ts"), capacitorConfig);
+
+  if (answers.installDependencies) {
+    const install = PACKAGE_MANAGER_INSTALL_COMMAND[answers.packageManager];
+    await runCommand(
+      install[0],
+      [
+        ...install.slice(1),
+        "@capacitor/core",
+        "@capacitor/ios",
+        "@capacitor/android",
+      ],
+      { cwd: targetDir, dryRun: false, label: "Install Capacitor dependencies" },
+    );
+    const devInstall = PACKAGE_MANAGER_DEV_INSTALL_COMMAND[answers.packageManager];
+    await runCommand(
+      devInstall[0],
+      [...devInstall.slice(1), "@capacitor/cli"],
+      { cwd: targetDir, dryRun: false, label: "Install Capacitor CLI" },
+    );
+  }
 }
 
 async function writeJson(filePath: string, value: unknown) {

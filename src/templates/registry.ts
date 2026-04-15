@@ -38,6 +38,18 @@ export const TEMPLATE_DEFINITIONS: TemplateDefinition[] = [
     description: "Workspace starter with apps/web and packages/ui.",
     framework: "monorepo",
   },
+  {
+    id: "ios-swiftui",
+    label: "iOS (SwiftUI)",
+    description: "Native iOS app with SwiftUI, XcodeGen project.yml.",
+    framework: "ios",
+  },
+  {
+    id: "react-capacitor",
+    label: "React + Capacitor (iOS/Android)",
+    description: "React + Vite app with Capacitor for iOS and Android.",
+    framework: "mobile",
+  },
 ];
 
 export const TEMPLATE_IDS = TEMPLATE_DEFINITIONS.map((t) => t.id);
@@ -60,11 +72,17 @@ export function templateFromFramework(framework: Framework): TemplateId {
       return "monorepo-web-ui";
     case "plugin":
       return "plugin-file";
+    case "ios":
+      return "ios-swiftui";
+    case "mobile":
+      return "react-capacitor";
   }
 }
 
 export function frameworkFromTemplate(template: TemplateId): Framework {
   if (template === "plugin-file") return "plugin";
+  if (template === "ios-swiftui") return "ios";
+  if (template === "react-capacitor") return "mobile";
   const found = TEMPLATE_DEFINITIONS.find((entry) => entry.id === template);
   return found?.framework ?? "vite";
 }

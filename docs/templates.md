@@ -84,6 +84,44 @@ Generated files:
 - `packages/ui/tsconfig.json`
 - `packages/ui/src/index.tsx`
 
+## `ios-swiftui`
+
+Created directly by this CLI as a native iOS SwiftUI starter.
+
+Requirements: Xcode 15+, [XcodeGen](https://github.com/yonaskolb/XcodeGen)
+
+Generated files:
+- `README.md`
+- `project.yml` (XcodeGen config)
+- `<ProjectName>/Info.plist`
+- `<ProjectName>/App/<ProjectName>App.swift`
+- `<ProjectName>/Views/ContentView.swift`
+
+After scaffolding:
+```bash
+brew install xcodegen
+xcodegen generate
+open <ProjectName>.xcodeproj
+```
+
+## `react-capacitor`
+
+Same Vite base as `vite-react`, with Capacitor wired for iOS and Android.
+
+Core scaffold additions/overrides:
+- All `vite-react` files, plus:
+- `capacitor.config.ts`
+- `package.json` dependencies:
+  - `@capacitor/core`
+  - `@capacitor/ios`
+  - `@capacitor/android`
+- `package.json` devDependencies:
+  - `@capacitor/cli`
+- `package.json` scripts:
+  - `cap:sync`
+  - `cap:open:ios`
+  - `cap:open:android`
+
 ## `plugin-file`
 
 Created from a local JSON file via `--template-file`.

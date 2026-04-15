@@ -17,6 +17,10 @@ export function getStarterFiles(answers: Answers): Array<{ path: string; content
     ? `import { cn } from '${answers.useSrcDir ? '@/lib/cn' : '@/lib/cn'}';`
     : `import { cn } from '${libDir === 'src/lib' ? '../lib/cn' : '../lib/cn'}';`;
 
+  const uiDir = base ? `${base}/ui` : 'ui';
+  const servicesDir = base ? `${base}/services` : 'services';
+  const utilsDir = base ? `${base}/utils` : 'utils';
+
   return [
     {
       path: `${libDir}/cn.${answers.typescript ? 'ts' : 'js'}`,
@@ -53,6 +57,27 @@ Place reusable hooks here.
       content: `# Components
 
 Place app-specific components here. Reusable cross-project components belong in your shared UI package.
+`,
+    },
+    {
+      path: `${uiDir}/README.md`,
+      content: `# UI
+
+Place shared UI primitives and design system components here.
+`,
+    },
+    {
+      path: `${servicesDir}/README.md`,
+      content: `# Services
+
+Place API clients, data-fetching logic, and external service integrations here.
+`,
+    },
+    {
+      path: `${utilsDir}/README.md`,
+      content: `# Utils
+
+Place general-purpose utility functions here.
 `,
     },
   ];

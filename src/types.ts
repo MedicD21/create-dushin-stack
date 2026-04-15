@@ -1,11 +1,13 @@
-export type Framework = "next" | "vite" | "node" | "monorepo" | "plugin";
+export type Framework = "next" | "vite" | "node" | "monorepo" | "plugin" | "ios" | "mobile";
 export type TemplateId =
   | "next-app"
   | "vite-react"
   | "vite-router-query"
   | "node-api-hono"
   | "monorepo-web-ui"
-  | "plugin-file";
+  | "plugin-file"
+  | "ios-swiftui"
+  | "react-capacitor";
 export type PresetId = "starter" | "saas" | "content-site" | "dashboard";
 export type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
 
