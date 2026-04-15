@@ -1405,8 +1405,14 @@ async function scaffoldNodeApiTemplate(answers, targetDir) {
     path2.join(targetDir, "package.json"),
     renderNodeApiPackageJson(answers.projectName)
   );
-  await writeFileSafe(path2.join(targetDir, "tsconfig.json"), renderNodeApiTsconfig());
-  await writeFileSafe(path2.join(targetDir, "src", "index.ts"), renderNodeApiEntry());
+  await writeFileSafe(
+    path2.join(targetDir, "tsconfig.json"),
+    renderNodeApiTsconfig()
+  );
+  await writeFileSafe(
+    path2.join(targetDir, "src", "index.ts"),
+    renderNodeApiEntry()
+  );
   await writeFileSafe(path2.join(targetDir, ".gitignore"), renderGitIgnore());
   if (answers.installDependencies) {
     await runProjectInstall(answers, targetDir, false);
@@ -1421,19 +1427,31 @@ async function scaffoldMonorepoTemplate(answers, targetDir) {
     path2.join(targetDir, "package.json"),
     renderMonorepoRootPackageJson(answers.projectName, answers.packageManager)
   );
-  await writeFileSafe(path2.join(targetDir, "pnpm-workspace.yaml"), renderPnpmWorkspaceYaml());
+  await writeFileSafe(
+    path2.join(targetDir, "pnpm-workspace.yaml"),
+    renderPnpmWorkspaceYaml()
+  );
   await writeFileSafe(path2.join(targetDir, ".gitignore"), renderGitIgnore());
   await writeJson(
     path2.join(appsWebDir, "package.json"),
     renderMonorepoWebPackageJson(answers.projectName, answers.tailwind)
   );
-  await writeFileSafe(path2.join(appsWebDir, "tsconfig.json"), renderMonorepoWebTsconfig());
+  await writeFileSafe(
+    path2.join(appsWebDir, "tsconfig.json"),
+    renderMonorepoWebTsconfig()
+  );
   await writeFileSafe(
     path2.join(appsWebDir, "vite.config.ts"),
     renderMonorepoWebViteConfig(answers.tailwind)
   );
-  await writeFileSafe(path2.join(appsWebDir, "index.html"), renderMonorepoWebIndexHtml());
-  await writeFileSafe(path2.join(appsWebDir, "src", "main.tsx"), renderMonorepoWebMain());
+  await writeFileSafe(
+    path2.join(appsWebDir, "index.html"),
+    renderMonorepoWebIndexHtml()
+  );
+  await writeFileSafe(
+    path2.join(appsWebDir, "src", "main.tsx"),
+    renderMonorepoWebMain()
+  );
   await writeFileSafe(
     path2.join(appsWebDir, "src", "App.tsx"),
     renderMonorepoWebApp(answers.projectName)
@@ -1446,15 +1464,23 @@ async function scaffoldMonorepoTemplate(answers, targetDir) {
     path2.join(packagesUiDir, "package.json"),
     renderMonorepoUiPackageJson(answers.projectName)
   );
-  await writeFileSafe(path2.join(packagesUiDir, "tsconfig.json"), renderMonorepoUiTsconfig());
-  await writeFileSafe(path2.join(packagesUiDir, "src", "index.tsx"), renderMonorepoUiEntry());
+  await writeFileSafe(
+    path2.join(packagesUiDir, "tsconfig.json"),
+    renderMonorepoUiTsconfig()
+  );
+  await writeFileSafe(
+    path2.join(packagesUiDir, "src", "index.tsx"),
+    renderMonorepoUiEntry()
+  );
   if (answers.installDependencies) {
     await runProjectInstall(answers, targetDir, false);
   }
 }
 async function scaffoldPluginTemplate(answers, targetDir) {
   if (!answers.templateFile) {
-    throw new Error("--template-file is required when using plugin-file template.");
+    throw new Error(
+      "--template-file is required when using plugin-file template."
+    );
   }
   const templateFile = await readPluginTemplateFile(answers.templateFile);
   await ensureDir(targetDir);
@@ -1462,7 +1488,10 @@ async function scaffoldPluginTemplate(answers, targetDir) {
     await writeFileSafe(path2.join(targetDir, relativePath), content);
   }
   if (templateFile.packageJson) {
-    await writeJson(path2.join(targetDir, "package.json"), templateFile.packageJson);
+    await writeJson(
+      path2.join(targetDir, "package.json"),
+      templateFile.packageJson
+    );
   }
   if (answers.installDependencies && templateFile.packageJson) {
     await runProjectInstall(answers, targetDir, false);
@@ -1472,10 +1501,16 @@ async function customizeProject(answers, targetDir) {
   logger.step("Applying project polish");
   if (answers.template !== "plugin-file" && answers.template !== "ios-swiftui") {
     await writeFileSafe(path2.join(targetDir, ".gitignore"), renderGitIgnore());
-    await writeFileSafe(path2.join(targetDir, "README.md"), renderReadme(answers));
+    await writeFileSafe(
+      path2.join(targetDir, "README.md"),
+      renderReadme(answers)
+    );
   }
   if (answers.template === "ios-swiftui") {
-    await writeFileSafe(path2.join(targetDir, "README.md"), renderReadme(answers));
+    await writeFileSafe(
+      path2.join(targetDir, "README.md"),
+      renderReadme(answers)
+    );
   }
   if (answers.template === "next-app") {
     await customizeNextProject(answers, targetDir);
@@ -1632,7 +1667,10 @@ async function writeViteAppFiles(targetDir, answers) {
   const srcDir = path2.join(targetDir, "src");
   const isTs = answers.typescript;
   await ensureDir(srcDir);
-  await writeFileSafe(path2.join(srcDir, "index.css"), renderIndexCss(answers.tailwind));
+  await writeFileSafe(
+    path2.join(srcDir, "index.css"),
+    renderIndexCss(answers.tailwind)
+  );
   if (answers.template === "vite-router-query") {
     await writeFileSafe(
       path2.join(srcDir, `App.${isTs ? "tsx" : "jsx"}`),
@@ -1647,7 +1685,10 @@ async function writeViteAppFiles(targetDir, answers) {
 }
 async function updateViteEntryFile(targetDir, answers) {
   const srcDir = path2.join(targetDir, "src");
-  const mainPath = path2.join(srcDir, `main.${answers.typescript ? "tsx" : "jsx"}`);
+  const mainPath = path2.join(
+    srcDir,
+    `main.${answers.typescript ? "tsx" : "jsx"}`
+  );
   if (!await fileExists(mainPath)) {
     return;
   }
@@ -1697,8 +1738,12 @@ async function updateJsConfig(targetDir, answers) {
       }
     }
   };
-  await fs3.writeFile(jsconfigPath, `${JSON.stringify(config, null, 2)}
-`, "utf8");
+  await fs3.writeFile(
+    jsconfigPath,
+    `${JSON.stringify(config, null, 2)}
+`,
+    "utf8"
+  );
 }
 async function mergeCompilerOptionsIntoJson(filePath, incoming) {
   const parsed = parseJsonLike(await fs3.readFile(filePath, "utf8"));
@@ -1733,8 +1778,14 @@ Shared UI package configured: \`${packageName}\`
 }
 function parseJsonLike(input2) {
   const withoutBlockComments = input2.replace(/\/\*[\s\S]*?\*\//g, "");
-  const withoutLineComments = withoutBlockComments.replace(/(^|\s)\/\/.*$/gm, "");
-  const withoutTrailingCommas = withoutLineComments.replace(/,\s*([}\]])/g, "$1");
+  const withoutLineComments = withoutBlockComments.replace(
+    /(^|\s)\/\/.*$/gm,
+    ""
+  );
+  const withoutTrailingCommas = withoutLineComments.replace(
+    /,\s*([}\]])/g,
+    "$1"
+  );
   return JSON.parse(withoutTrailingCommas);
 }
 function packageManagerFlag(packageManager) {
@@ -1760,7 +1811,9 @@ async function runProjectInstall(answers, targetDir, dryRun) {
 }
 async function runHealthChecks(answers, targetDir) {
   if (!answers.installDependencies) {
-    logger.warn("Skipping health checks because dependencies were not installed.");
+    logger.warn(
+      "Skipping health checks because dependencies were not installed."
+    );
     return [
       {
         name: "health-checks",
@@ -1802,13 +1855,18 @@ async function runHealthChecks(answers, targetDir) {
     if (result.passed) {
       logger.success(`Health check passed: ${result.name}`);
     } else {
-      logger.error(`Health check failed: ${result.name}${result.message ? ` (${result.message})` : ""}`);
+      logger.error(
+        `Health check failed: ${result.name}${result.message ? ` (${result.message})` : ""}`
+      );
     }
   }
   return results;
 }
 async function runScript(packageManager, script, cwd) {
-  const [command, ...args] = packageManagerRunScriptCommand(packageManager, script);
+  const [command, ...args] = packageManagerRunScriptCommand(
+    packageManager,
+    script
+  );
   await execa(command, args, {
     cwd,
     stdio: "inherit"
@@ -1825,7 +1883,10 @@ async function scaffoldIosSwiftUiTemplate(answers, targetDir) {
   const viewsDir = path2.join(targetDir, answers.projectName, "Views");
   await ensureDir(appDir);
   await ensureDir(viewsDir);
-  await writeFileSafe(path2.join(targetDir, "project.yml"), renderProjectYml(answers.projectName));
+  await writeFileSafe(
+    path2.join(targetDir, "project.yml"),
+    renderProjectYml(answers.projectName)
+  );
   await writeFileSafe(
     path2.join(targetDir, answers.projectName, "Info.plist"),
     renderInfoPlist(answers.projectName)
@@ -1874,7 +1935,10 @@ const config: CapacitorConfig = {
 
 export default config;
 `;
-  await writeFileSafe(path2.join(targetDir, "capacitor.config.ts"), capacitorConfig);
+  await writeFileSafe(
+    path2.join(targetDir, "capacitor.config.ts"),
+    capacitorConfig
+  );
   if (answers.installDependencies) {
     const install = PACKAGE_MANAGER_INSTALL_COMMAND[answers.packageManager];
     await runCommand(
@@ -1885,7 +1949,11 @@ export default config;
         "@capacitor/ios",
         "@capacitor/android"
       ],
-      { cwd: targetDir, dryRun: false, label: "Install Capacitor dependencies" }
+      {
+        cwd: targetDir,
+        dryRun: false,
+        label: "Install Capacitor dependencies"
+      }
     );
     const devInstall = PACKAGE_MANAGER_DEV_INSTALL_COMMAND[answers.packageManager];
     await runCommand(
@@ -1911,7 +1979,14 @@ async function runCommand(command, args, opts) {
 
 // src/index.ts
 var program = new Command();
-var frameworks = ["next", "vite", "node", "monorepo", "ios", "mobile"];
+var frameworks = [
+  "next",
+  "vite",
+  "node",
+  "monorepo",
+  "ios",
+  "mobile"
+];
 var packageManagers = ["pnpm", "npm", "yarn", "bun"];
 program.name("create-dushin-stack").description(
   "Scaffold polished templates for Next.js, Vite, APIs, and monorepos."
@@ -1927,10 +2002,7 @@ program.name("create-dushin-stack").description(
   "--preset <preset>",
   `starter, saas, content-site, or dashboard`,
   parseChoice("preset", presetIds)
-).option(
-  "--template-file <path>",
-  "Path to a local plugin template JSON file"
-).option(
+).option("--template-file <path>", "Path to a local plugin template JSON file").option(
   "-p, --package-manager <packageManager>",
   "pnpm, npm, yarn, or bun",
   parseChoice("package manager", packageManagers)
