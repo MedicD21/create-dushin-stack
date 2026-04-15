@@ -38,6 +38,12 @@ pnpm build
 pnpm link --global
 ```
 
+Or run the one-command bootstrap:
+
+```bash
+pnpm run setup:global
+```
+
 Then run:
 
 ```bash

@@ -10,6 +10,7 @@
     "dist"
   ],
   "scripts": {
+    "setup:global": "pnpm install && pnpm build && pnpm link --global",
     "build": "tsup src/index.ts --format esm --dts --clean --target node20",
     "dev": "tsup src/index.ts --watch --format esm --dts --target node20",
     "typecheck": "tsc --noEmit",
