@@ -1,0 +1,33 @@
+{
+  "name": "create-morgan-stack",
+  "version": "0.1.0",
+  "description": "Interactive project scaffolder for Next.js and React/Vite with Tailwind, TypeScript, and opinionated defaults.",
+  "type": "module",
+  "bin": {
+    "create-morgan-stack": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --clean --target node20",
+    "dev": "tsx src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "dependencies": {
+    "@inquirer/prompts": "^8.2.1",
+    "commander": "^14.0.1",
+    "execa": "^9.6.0",
+    "picocolors": "^1.1.1",
+    "validate-npm-package-name": "^6.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.5.2",
+    "tsup": "^8.5.0",
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
