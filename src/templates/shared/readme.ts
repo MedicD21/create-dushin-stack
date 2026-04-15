@@ -1,8 +1,15 @@
 import type { Answers } from "../../types.js";
 
+const TEMPLATE_LABELS: Record<Answers["template"], string> = {
+  "next-app": "Next.js App",
+  "vite-react": "React + Vite",
+  "vite-router-query": "Vite + Router + Query",
+  "node-api-hono": "Node API (Hono)",
+  "monorepo-web-ui": "Monorepo (web + ui)",
+  "plugin-file": "Plugin template",
+};
+
 export function renderReadme(answers: Answers) {
-  const frameworkLabel =
-    answers.framework === "next" ? "Next.js" : "React + Vite";
   const runCommand =
     answers.packageManager === "npm"
       ? "npm run dev"
@@ -12,9 +19,13 @@ export function renderReadme(answers: Answers) {
 
 Scaffolded with create-dushin-stack.
 
+## Template
+
+- ${TEMPLATE_LABELS[answers.template]}
+- Preset: ${answers.preset}
+
 ## Stack
 
-- ${frameworkLabel}
 - ${answers.typescript ? "TypeScript" : "JavaScript"}
 - ${answers.tailwind ? "Tailwind CSS" : "No Tailwind CSS"}
 - ${answers.eslint ? "ESLint" : "No ESLint"}
@@ -27,13 +38,10 @@ Install dependencies if you skipped install during scaffolding, then run:
 
 ## Notes
 
-- Import alias: \
-${answers.importAlias}\
+- Import alias: ${answers.importAlias}
 ${
   answers.installSharedUi
-    ? `- Shared UI package wired in: \
-${answers.sharedUiPackageName}\
-`
+    ? `- Shared UI package wired in: ${answers.sharedUiPackageName}\n`
     : ""
 }`;
 }

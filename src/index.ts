@@ -1,24 +1,44 @@
 #!/usr/bin/env node
 import { Command, InvalidArgumentError } from "commander";
-import { collectAnswers } from "./prompts.js";
+import { collectAnswers, presetIds } from "./prompts.js";
 import { logger } from "./lib/logger.js";
 import { scaffoldProject } from "./scaffold.js";
-import type { Framework, PackageManager } from "./types.js";
+import { TEMPLATE_IDS } from "./templates/registry.js";
+import type {
+  Framework,
+  PackageManager,
+  PresetId,
+  TemplateId,
+} from "./types.js";
 
 const program = new Command();
-const frameworks = ["next", "vite"] as const;
+const frameworks = ["next", "vite", "node", "monorepo"] as const;
 const packageManagers = ["pnpm", "npm", "yarn", "bun"] as const;
 
 program
   .name("create-dushin-stack")
   .description(
-    "Scaffold a polished Next.js or React/Vite project with your preferred defaults.",
+    "Scaffold polished templates for Next.js, Vite, APIs, and monorepos.",
   )
   .argument("[project-name]", "Name of the project to create")
   .option(
     "-f, --framework <framework>",
-    "next or vite",
+    "next, vite, node, or monorepo",
     parseChoice("framework", frameworks),
+  )
+  .option(
+    "-t, --template <template>",
+    `Template id (${TEMPLATE_IDS.join(", ")})`,
+    parseChoice("template", TEMPLATE_IDS),
+  )
+  .option(
+    "--preset <preset>",
+    `starter, saas, content-site, or dashboard`,
+    parseChoice("preset", presetIds),
+  )
+  .option(
+    "--template-file <path>",
+    "Path to a local plugin template JSON file",
   )
   .option(
     "-p, --package-manager <packageManager>",
@@ -49,6 +69,9 @@ program
   .option("--no-git", "Skip git initialization")
   .option("--install", "Install dependencies")
   .option("--no-install", "Skip dependency installation")
+  .option("--health-checks", "Run lint/typecheck/build after scaffolding")
+  .option("--no-health-checks", "Skip post-scaffold health checks")
+  .option("--json", "Print final scaffold summary as JSON")
   .option("-y, --yes", "Use defaults for any unanswered prompts")
   .option("--dry-run", "Print the commands without executing them")
   .action(async (projectName: string | undefined, options) => {
@@ -58,6 +81,9 @@ program
       const answers = await collectAnswers({
         projectName,
         framework: options.framework as Framework | undefined,
+        template: options.template as TemplateId | undefined,
+        preset: options.preset as PresetId | undefined,
+        templateFile: options.templateFile,
         packageManager: options.packageManager as PackageManager | undefined,
         tailwind: optionValue(options, "tailwind"),
         typescript: optionValue(options, "typescript"),
@@ -71,13 +97,19 @@ program
         addStarterFolders: optionValue(options, "starterFolders"),
         initializeGit: optionValue(options, "git"),
         installDependencies: optionValue(options, "install"),
+        runHealthChecks: optionValue(options, "healthChecks"),
+        jsonOutput: Boolean(options.json),
         yes: Boolean(options.yes),
       });
 
-      await scaffoldProject(answers, {
+      const result = await scaffoldProject(answers, {
         cwd: process.cwd(),
         dryRun: Boolean(options.dryRun),
       });
+
+      if (answers.jsonOutput) {
+        console.log(JSON.stringify(result, null, 2));
+      }
     } catch (error) {
       if (error instanceof Error && error.name === "ExitPromptError") {
         logger.warn("Setup cancelled.");

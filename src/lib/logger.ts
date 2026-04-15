@@ -19,7 +19,7 @@ export const logger = {
   banner() {
     console.log(pc.bold(pc.magenta("\ncreate-dushin-stack\n")));
     console.log(
-      pc.dim("Scaffold a clean React app with your preferred defaults.\n"),
+      pc.dim("Scaffold polished templates with your preferred defaults.\n"),
     );
   },
 };

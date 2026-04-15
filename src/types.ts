@@ -1,9 +1,20 @@
-export type Framework = 'next' | 'vite';
-export type PackageManager = 'pnpm' | 'npm' | 'yarn' | 'bun';
+export type Framework = "next" | "vite" | "node" | "monorepo" | "plugin";
+export type TemplateId =
+  | "next-app"
+  | "vite-react"
+  | "vite-router-query"
+  | "node-api-hono"
+  | "monorepo-web-ui"
+  | "plugin-file";
+export type PresetId = "starter" | "saas" | "content-site" | "dashboard";
+export type PackageManager = "pnpm" | "npm" | "yarn" | "bun";
 
 export interface Answers {
   projectName: string;
   framework: Framework;
+  template: TemplateId;
+  preset: PresetId;
+  templateFile: string;
   packageManager: PackageManager;
   typescript: boolean;
   tailwind: boolean;
@@ -17,4 +28,6 @@ export interface Answers {
   addStarterFolders: boolean;
   initializeGit: boolean;
   installDependencies: boolean;
+  runHealthChecks: boolean;
+  jsonOutput: boolean;
 }

@@ -33,6 +33,9 @@ jobs:
       - name: Build
         run: pnpm -s build
 
+      - name: Integration tests
+        run: pnpm -s test:integration
+
       - name: CLI smoke test (Vite + Tailwind)
         run: >
           node dist/index.js ci-vite --framework vite --package-manager pnpm
@@ -42,6 +45,50 @@ jobs:
       - name: CLI smoke test (Next.js)
         run: >
           node dist/index.js ci-next --framework next --package-manager pnpm
+          --typescript --tailwind --eslint --src-dir --app-router --install
+          --git --starter-folders --import-alias '@/*' --no-shared-ui --yes
+          --dry-run
+
+  cli-smoke-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package_manager: [pnpm, npm, yarn]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm -s build
+
+      - name: CLI smoke test (Vite)
+        run: >
+          node dist/index.js matrix-vite --framework vite
+          --package-manager ${{ matrix.package_manager }}
+          --typescript --tailwind --eslint --src-dir --install --git
+          --starter-folders --import-alias '@/*' --no-shared-ui --yes --dry-run
+
+      - name: CLI smoke test (Next.js)
+        run: >
+          node dist/index.js matrix-next --framework next
+          --package-manager ${{ matrix.package_manager }}
           --typescript --tailwind --eslint --src-dir --app-router --install
           --git --starter-folders --import-alias '@/*' --no-shared-ui --yes
           --dry-run
